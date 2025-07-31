@@ -4,12 +4,11 @@ import json
 import prody as pr
 
 # 경로
-tsv_path = r"C:\Users\Kunny\Research\Dataset\Missense Variant dataset\rhapsody2_sav_db.tsv"
 json_path = r"C:\Users\Kunny\Research\Dataset\Missense Variant dataset\UniProtID_to_seq.json"
 pdb_dir = r"C:\Users\Kunny\Research\Dataset\Missense Variant dataset\alphafold_structures"
 
 # 데이터 로드
-df = pd.read_csv(r"C:\Users\Kunny\Research\Dataset\Missense Variant dataset\rhapsody2_sav_db.tsv", sep="\t", header=None)
+df = pd.read_csv(r"C:\Users\Kunny\Research\Dataset\Missense Variant dataset\rhapsody2_sav_db_exactmatch_only.tsv", sep="\t", header=None)
 df.columns = ["UniProtID", "StructureFile", "MutPos", "WT", "Mut", "Label"]
 
 with open(json_path) as f:
