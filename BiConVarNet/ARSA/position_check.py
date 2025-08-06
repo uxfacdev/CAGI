@@ -7,9 +7,8 @@ from tqdm import tqdm
 
 # 경로 설정
 json_path = r"C:\Users\Kunny\Research\Dataset\Missense_Variant_dataset\UniProtID_to_seq.json"
-pdb_dir = r"E:\CAGI_data\pdb_files"
-df_path = r"C:\Users\Kunny\Research\Project\BiConVarNet\filtered_variants_cleaned_final.tsv" 
-fail_log_path = r"C:\Users\Kunny\Research\Project\BiConVarNet\failed_fasta_pdb_match_2.tsv"
+pdb_dir = r"C:\Users\Kunny\Research\Dataset\Missense_Variant_dataset\alphafold_structures"
+df_path = r"C:\Users\Kunny\Research\Project\BiConVarNet\ARSA\sample_data.tsv"
 
 # UniProt 시퀀스 로드
 with open(json_path) as f:
@@ -27,7 +26,7 @@ def check_row(row):
     uid = row["UniProtID"]
     structure_file = row["StructureFile"]
     mut_pos = int(row["MutPos"])
-    mut_pos_pdb = int(row["MutPos(pdb)"])
+    mut_pos_pdb = int(row["MutPos"]) 
     wt = row["WT"]
 
     fasta_residue = uniprot_seq_dict.get(uid, "")[mut_pos - 1] if uid in uniprot_seq_dict and 1 <= mut_pos <= len(uniprot_seq_dict[uid]) else "?"
@@ -35,21 +34,16 @@ def check_row(row):
     fasta_match = (fasta_residue == wt)
 
     pdb_file = os.path.join(pdb_dir, structure_file)
-    
-    if not os.path.exists(pdb_file):
-        pdb_match = True  # 눈감고 넘어감
+    try:
+        structure = pr.parsePDB(pdb_file, subset='ca')
+        resnames = structure.getResnames()
+        resname = resnames[mut_pos_pdb - 1] if mut_pos_pdb - 1 < len(resnames) else "???"
+        pdb_residue = aa_names.get(resname, "?")
+        pdb_match = (pdb_residue == wt)
         pdb_error = False
-    else:
-        try:
-            structure = pr.parsePDB(pdb_file, subset='ca')
-            resnames = structure.getResnames()
-            resname = resnames[mut_pos_pdb - 1] if mut_pos_pdb - 1 < len(resnames) else "???"
-            pdb_residue = aa_names.get(resname, "?")
-            pdb_match = (pdb_residue == wt)
-            pdb_error = False
-        except:
-            pdb_match = False
-            pdb_error = True
+    except:
+        pdb_match = False
+        pdb_error = True
 
     fail_reason = None
     if not fasta_match:
@@ -76,7 +70,7 @@ if __name__ == "__main__":
     df = pd.read_csv(df_path, sep="\t")
 
     # 병렬 실행
-    with ProcessPoolExecutor(max_workers=22) as executor:
+    with ProcessPoolExecutor(max_workers=20) as executor:
         results = list(tqdm(executor.map(check_row, [row for _, row in df.iterrows()]), total=len(df)))
 
     # 통계 요약
@@ -91,7 +85,7 @@ if __name__ == "__main__":
     print(f"FASTA 기준 일치 수: {fasta_match} ({fasta_match / total:.2%})")
     print(f"PDB 기준 일치 수:   {pdb_match} ({pdb_match / total:.2%})")
     print(f"PDB 파싱 실패 수:    {pdb_fail}")
-    print(f"불일치 총 {len(failures)}건 → {fail_log_path}에 저장")
+    print(f"불일치 총 {len(failures)}건")
 
     # 실패 로그 저장
-    pd.DataFrame(failures).to_csv(fail_log_path, sep="\t", index=False)
+    # pd.DataFrame(failures).to_csv(fail_log_path, sep="\t", index=False)
