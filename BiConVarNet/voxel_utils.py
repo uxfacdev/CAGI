@@ -7,7 +7,9 @@ AA3_LIST = [
     'ALA', 'CYS', 'ASP', 'GLU', 'PHE', 'GLY', 'HIS',
     'ILE', 'LYS', 'LEU', 'MET', 'ASN', 'PRO', 'GLN',
     'ARG', 'SER', 'THR', 'VAL', 'TRP', 'TYR', 'UNK'
-]
+] # 3글자 아미노산 코드 20개 + 'UNK' = 총 21개, 'UNK'는 알 수 없는 아미노산에 대한 placeholder
+
+
 ATOM_TYPES = ['CA', 'CB']
 AA3_TO_INDEX = {aa: i for i, aa in enumerate(AA3_LIST)}
 
