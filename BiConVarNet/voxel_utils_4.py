@@ -114,7 +114,7 @@ def compute_voxel_features_structural(
     chain_id: Optional[str] = None,
     add_dpos2: bool = True,
     add_plddt: bool = True,
-    add_rsa: bool = True,
+    add_rsa: bool = False,
     add_resdepth: bool = False,
     add_gnm_msf: bool = True,
     wt1: Optional[str] = None,       # ✅ 추가: TSV의 WT 1-letter (옵션)

@@ -257,20 +257,22 @@ def extract_struct_S(
     pro_switch = 1.0 if (AA1_TO_AA3[wt1.upper()]=='PRO') ^ (AA1_TO_AA3[mut1.upper()]=='PRO') else 0.0
 
     # inside extract_struct_S
-    psic, H = np.nan, np.nan, np.nan
-    if isinstance(msa_dict[uid][0], tuple):  
-        msa_seqs = [s for _,s in msa_dict[uid]]
-        psic, H = calc_msa_conservation(msa_seqs, mut_pos-1, wt1, mut1)
-    else:
-        counts, total = msa_dict[uid][mut_pos-1]
-        if total > 0:
-            p_wt = counts.get(wt1, 0) / total
-            p_mut = counts.get(mut1, 0) / total
-            psic = -np.log(p_mut+1e-8) + np.log(p_wt+1e-8)
-            freqs = np.array([counts[a]/total for a in AA_LIST], dtype=np.float32)
-            H = -np.sum(freqs * np.log(freqs+1e-8))
-        else:
-            psic, H = np.nan, np.nan
+    psic, H = np.nan, np.nan
+    if msa_dict is not None and uid in msa_dict:
+        first_elem = msa_dict[uid][0][0]
+        if isinstance(first_elem, str):
+            # 원본 msa_dict 버전
+            msa_seqs = [s for _, s in msa_dict[uid]]
+            psic, H = calc_msa_conservation(msa_seqs, mut_pos-1, wt1, mut1)
+        elif isinstance(first_elem, dict):
+            # precomputed 버전
+            counts, total = msa_dict[uid][mut_pos-1]
+            if total > 0:
+                p_wt = counts.get(wt1, 0) / total
+                p_mut = counts.get(mut1, 0) / total
+                psic = -np.log(p_mut+1e-8) + np.log(p_wt+1e-8)
+                freqs = np.array([counts[a]/total for a in AA_LIST], dtype=np.float32)
+                H = -np.sum(freqs * np.log(freqs+1e-8))
 
     S = np.array([
         plddt_c, plddt_mean, plddt_min, plddt_max,
