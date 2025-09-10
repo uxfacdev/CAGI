@@ -8,7 +8,7 @@ from tqdm import tqdm
 # 경로 설정
 json_path = r"C:\Users\Kunny\Research\Dataset\Missense_Variant_dataset\UniProtID_to_seq.json"
 pdb_dir = r"C:\Users\Kunny\Research\Dataset\Missense_Variant_dataset\alphafold_structures"
-df_path = r"C:\Users\Kunny\Research\Project\BiConVarNet\ARSA\sample_data.tsv"
+df_path = r"C:\Users\Kunny\Research\Project\BiConVarNet\ARSA\ARSA_variants_formatted.tsv"
 
 # UniProt 시퀀스 로드
 with open(json_path) as f:
