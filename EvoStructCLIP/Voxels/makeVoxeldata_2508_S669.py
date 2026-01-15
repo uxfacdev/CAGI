@@ -3,19 +3,19 @@ import os, numpy as np, pandas as pd, pickle
 from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
 
-tsv_path   = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\Stability\S2450_Final_PDB_Mapped.tsv"
-pdb_dir    = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\Stability\pdb_files_s2648"
-output_dir = r"E:\CAGI_data\voxel_cache_S2450"
+tsv_path   = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\Stability\S669_Offset_Corrected.tsv"
+pdb_dir    = r"C:\Users\Kunny\Downloads\S669\S669\pdbs"
+output_dir = r"E:\CAGI_data\voxel_cache_S669"
 os.makedirs(output_dir, exist_ok=True)
 
 def voxelize_and_save(row):
     uid  = row["PDB"]
     wt1  = str(row["WT"]).strip().upper()
     mut1 = str(row.get("MT","")).strip().upper()
-    structure_file = row["MAPPED_PDB"].lower() + ".pdb"
-    mut_pos = int(row["MAPPED_PDB_POS"])
+    structure_file = row["PDB_ID_FINAL"][:-1].lower() + ".pdb"
+    mut_pos = int(row["PDB_POS_FINAL"])
     label   = int(row["DDG"])
-    target_chain = row["MAPPED_CHAIN"] 
+    target_chain =  row["PDB_ID_FINAL"][-1]
 
     key = f"{uid}_{mut_pos}"
     pdb_path = os.path.join(pdb_dir, structure_file)
@@ -69,9 +69,12 @@ if __name__ == "__main__":
             if qc_row is not None:
                 qc_rows.append(qc_row)
 
+        print(key, status, qc_row)
+
     # 상태 로그
     log_path = os.path.join(output_dir, "voxelization_log.csv")
-
+    pd.DataFrame(results, columns=["Key","Status"]).to_csv(log_path, index=False)
+    
     # QC 로그 (미스매치/주의사항만)
     if qc_rows:
         qc_path = os.path.join(output_dir, "voxel_qc_log.csv")
