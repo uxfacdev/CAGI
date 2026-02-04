@@ -12,3 +12,12 @@ mmseqs result2msa merged_all uniref90_mmseqs merged_result_all merged_msa_a3m_al
   --filter-min-enable 100 \
   --diff 500
 
+mmseqs result2msa merged_all uniref90_mmseqs merged_result_all merged_msa_a3m_all_shallow \
+  --msa-format-mode 5 \
+  --threads 36 \
+  --max-seq-id 0.98 \
+  --qid 0.2 \
+  --cov 0.2 \
+  --filter-msa 1 \
+  --filter-min-enable 300 \
+  --diff 500

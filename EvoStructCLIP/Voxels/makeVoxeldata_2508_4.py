@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 tsv_path   = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\Stability\S2450_Final_PDB_Mapped.tsv"
 pdb_dir    = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\Stability\pdb_files_s2648"
-output_dir = r"E:\CAGI_data\voxel_cache_S2450"
+output_dir = r"E:\CAGI_data\voxel_cache_S2450_no_PLDDT"
 os.makedirs(output_dir, exist_ok=True)
 
 def voxelize_and_save(row):
@@ -28,7 +28,7 @@ def voxelize_and_save(row):
         feat, mapping, qc = compute_voxel_features_structural(
             pdb_path, mut_pos,
             chain_id=target_chain,                    # 필요 시 지정
-            add_dpos2=True, add_plddt=True, add_gnm_msf=True,
+            add_dpos2=True, add_plddt=False, add_gnm_msf=True,
             wt1=wt1                           # ✅ WT 전달 → 함수 내부에서 미스매치 체크
         )
 

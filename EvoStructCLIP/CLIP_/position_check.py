@@ -6,9 +6,9 @@ from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
 
 # 경로 설정
-json_path = r"C:\Users\Kunny\Research\Dataset\Missense_Variant_dataset\UniProtID_to_seq.json"
-pdb_dir = r"E:\CAGI_data\pdb_files"
-df_path = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\CLIP_\filtered_variants_cleaned_final.tsv"
+json_path = r"E:\Missense_Variant_dataset\UniProtID_to_seq.json"
+pdb_dir = r"E:\CAGI_data\pdb_files_all_missense"
+df_path = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\CLIP_\AlphaMissense_variants_clip_sampled.tsv"
 fail_log_path = r"C:\Users\Kunny\Documents\GitHub\CAGI\EvoStructCLIP\CLIP_\failed_fasta_match.tsv"
 
 
