@@ -12,12 +12,27 @@ mmseqs result2msa merged_all uniref90_mmseqs merged_result_all merged_msa_a3m_al
   --filter-min-enable 100 \
   --diff 500
 
-mmseqs result2msa merged_all uniref90_mmseqs merged_result_all merged_msa_a3m_all_shallow \
+# mmseqs result2msa merged_all uniref90_mmseqs merged_result_all merged_msa_a3m_all_shallow \
+#   --msa-format-mode 5 \
+#   --threads 36 \
+#   --max-seq-id 0.98 \
+#   --qid 0.2 \
+#   --cov 0.2 \
+#   --filter-msa 1 \
+#   --filter-min-enable 300 \
+#   --diff 500
+
+
+mmseqs createdb Train_combined.fasta merged_fireprot
+
+mmseqs search merged_fireprot uniref90_mmseqs fp_result fp_tmp --threads 36 -e 0.001 --max-seqs 500
+
+mmseqs result2msa merged_fireprot uniref90_mmseqs fp_result fp_msa_a3m \
   --msa-format-mode 5 \
   --threads 36 \
-  --max-seq-id 0.98 \
-  --qid 0.2 \
-  --cov 0.2 \
+  --max-seq-id 0.95 \
+  --qid 0.3 \
+  --cov 0.3 \
   --filter-msa 1 \
-  --filter-min-enable 300 \
+  --filter-min-enable 100 \
   --diff 500

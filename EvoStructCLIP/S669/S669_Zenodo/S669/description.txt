@@ -1,0 +1,17 @@
+FILES
+s669.csv	table with the 699 protein variants with experimental and predicted DDG values
+pdbs/		experimental and predicted protein struture PDB files for the direct and inverse variants, respectively
+
+COLUMNS
+Protein			wildtype PDB id and chain
+PDB_Mut			direct variant with PDB position
+Seq_Mut			direct variant with sequence position
+Temperature		experimental temperature used for DDG measure
+pH			experimental pH  used for DDG measure
+DOI			DOI of the source paper
+EXPDTA			experimental technique used
+Resolution		resolution of the technique
+WT_PDB			wild-type protein structure file
+Chain			the protein chain where the variant occurs
+INV_PDB			mutated protein structure file
+Experimental_DDG_dir	experimental DDG value for the direct variant
