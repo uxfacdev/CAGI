@@ -121,7 +121,7 @@ This notebook provides an example of performing **downstream regression tasks** 
 3.  **Meta-Regression**: Uses the fused features to train downstream regressors.
 4.  **Ensemble Learning**: Implements a 10-fold Cross-Validation ensemble to maximize prediction stability and provide uncertainty estimates (Standard Deviation).
 
-### 🛠 Key Components
+<!-- ### 🛠 Key Components
 
 #### 1. Feature Collection
 The script freezes the pre-trained weights and runs a forward pass to collect "Meta-Features." This is a common pattern for adapting large models to specific biological property predictions (e.g., ΔΔG, functional scores).
@@ -137,4 +137,4 @@ The script freezes the pre-trained weights and runs a forward pass to collect "M
 ### 📊 Evaluation Metrics
 
 The final performance is evaluated using the **Pearson Correlation Coefficient ($r$)**. 
-The notebook concludes with a direct comparison between the **Random Forest** and **XGBoost** ensembles
+The notebook concludes with a direct comparison between the **Random Forest** and **XGBoost** ensembles -->
