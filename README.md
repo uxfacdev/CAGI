@@ -17,61 +17,80 @@ Before running the pipeline, ensure you have the required dependencies installed
 Install the core Python packages listed in `requirements.txt`:
 ```bash
 pip install -r requirements.txt
+```
 
-2. MMseqs2
-This pipeline relies on MMseqs2 for ultra-fast sequence searching and alignment. Please install it following the official MMseqs2 GitHub page or via conda:
-
-Bash
-
+### 2. MMseqs2
+This pipeline relies on MMseqs2 for ultra-fast sequence searching and alignment. Please install it following the official [MMseqs2 GitHub page](https://github.com/soedinglab/MMseqs2) or via conda:
+```bash
 conda install -c conda-forge -c bioconda mmseqs2
-Note: You also need a formatted target database (e.g., UniRef90) to run the search.
+```
+*Note: You also need a formatted target database (e.g., UniRef90) to run the search.*
 
-🚀 Pipeline Usage
-Step 1: Generate MSA using MMseqs2 (make_msa.sh)
+---
+
+## 🚀 Pipeline Usage
+
+### Step 1: Generate MSA using MMseqs2 (`make_msa.sh`)
 This bash script merges individual FASTA files, builds an MMseqs2 database, searches against a target database (e.g., UniRef90), and outputs an alignment file in A3M format.
 
-Usage:
-
-Bash
-
+**Usage:**
+```bash
 bash make_msa.sh \
   --input_dir <path_to_fasta_directory> \
   --target_db <path_to_uniref90_database> \
   --output_prefix <experiment_name> \
   --threads <number_of_threads>
-Example:
+```
 
-Bash
-
+**Example:**
+```bash
 bash make_msa.sh \
   --input_dir ./fasta_files_all_missense \
   --target_db /db/uniref90_mmseqs \
   --output_prefix merged_all \
   --threads 36
-Output: This will generate several intermediate files and the final alignment file named merged_all_msa_a3m.
+```
 
-Step 2: Parse and Validate MSA (parse_msa.py)
-This Python script parses the generated A3M file, validates it against the unique keys (e.g., UniProt IDs) present in your master TSV file, and saves the parsed MSA data as a Python dictionary in a .pkl file. This .pkl file is the final input required by the EvoStructCLIP MSA branch.
+---
 
-Usage:
+### Step 2: Parse and Validate MSA (`parse_msa.py`)
+This Python script parses the generated A3M file, validates it against the unique keys (e.g., UniProt IDs) present in your master TSV file, and saves the parsed MSA data as a Python dictionary in a `.pkl` file. This `.pkl` file is the final input required by the EvoStructCLIP MSA branch.
 
-Bash
-
+**Usage:**
+```bash
 python parse_msa.py \
   --tsv <path_to_input_tsv> \
   --a3m <path_to_a3m_file_from_step1> \
   --output <path_to_save_pickle>
-Example:
+```
 
-Bash
-
+**Example:**
+```bash
 python parse_msa.py \
   --tsv ./filtered_variants_cleaned_final.tsv \
   --a3m ./merged_all_msa_a3m \
   --output ./msa_dict_valid.pkl
-Validation Process:
-The script will check if every Key (e.g., UniProt ID) present in the TSV file exists in the parsed A3M data.
+```
 
-If validation passes, it saves the dictionary to the specified .pkl file.
+**Validation Process:**
+The script will check if every `Key` (e.g., UniProt ID) present in the TSV file exists in the parsed A3M data. 
+- If validation passes, it saves the dictionary to the specified `.pkl` file.
+- If validation fails (e.g., missing IDs), it will display an error message with examples and **will not** save the pickle file, ensuring data integrity.
 
-If validation fails (e.g., missing IDs), it will display an error message with examples and will not save the pickle file, ensuring data integrity.
+---
+
+## 📂 Output Data Structure
+
+The final output `msa_dict_valid.pkl` contains a Python `defaultdict(list)` structured as follows:
+
+```python
+{
+    "Query_ID_1": [
+        ("query", "MTEYKLVVVGAGGVGKSALTIQLI..."),
+        ("UniRef90_A0A024RBG1", "MTEYKLVVVGAGGVGKSALTIQLI..."),
+        # ... aligned homologous sequences
+    ],
+    "Query_ID_2": [ ... ]
+}
+```
+This structured format is directly fed into the Cross-axial Mamba block of EvoStructCLIP to extract evolutionary features.
