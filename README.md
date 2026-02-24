@@ -73,13 +73,68 @@ python generate_voxel.py \
 ```
 
 ---
-
 ## Training
 
+This script provides a streamlined pipeline to train the **EvoStructCLIP** model. It leverages a multimodal approach by aligning 3D structural voxels with evolutionary MSA information using a symmetric contrastive loss.
 
+### 🚀 Quick Start (Representative Usage)
+
+To start training with the required data paths, run the following command in your terminal:
+
+```bash
+python train.py \
+    --data_path "path/to/your_data.tsv" \
+    --voxel_cache "path/to/voxel_dir" \
+    --msa_dict "path/to/msa_dict.pkl" \
+    --save_path "checkpoints/best_model.pth"
+```
 ---
 
 ## Inference
 
+This script allows you to perform inference using a trained **EvoStructCLIP** model. It processes unlabeled protein variant data (TSV) and outputs both predicted probabilities and binary labels.
 
+### 🚀 Quick Start (Representative Usage)
+
+To run inference on your test data, use the following command:
+
+```bash
+python inference.py \
+    --test_data "path/to/test_variants.tsv" \
+    --model_path "checkpoints/best_model.pth" \
+    --voxel_cache "path/to/voxel_dir" \
+    --msa_dict "path/to/msa_dict.pkl" \
+    --output_path "results/predictions.tsv"
+```
 ---
+
+## Downstream Regression & Ensemble
+
+This notebook provides an example of performing **downstream regression tasks** on proteins using features extracted from a pre-trained **EvoStructCLIP** model. It demonstrates a meta-learning approach where frozen embeddings are combined with structural descriptors to train high-performance ensemble models like Random Forest and XGBoost.
+
+> **Note:** The input features (3D voxels, structural descriptors, and MSAs) must be pre-constructed and provided in the specified cache directories before running this notebook.
+
+### 💡 Workflow Overview
+
+1.  **Feature Extraction**: Loads a pre-trained EvoStructCLIP model and extracts 256-dimensional latent features (Voxel + MSA) for each variant.
+2.  **Feature Fusion**: Concatenates the CLIP embeddings with 19-dimensional structural descriptors (e.g., pLDDT, RSA, hydropathy, etc.) to create a final 275-dimensional feature vector.
+3.  **Meta-Regression**: Uses the fused features to train downstream regressors.
+4.  **Ensemble Learning**: Implements a 10-fold Cross-Validation ensemble to maximize prediction stability and provide uncertainty estimates (Standard Deviation).
+
+### 🛠 Key Components
+
+#### 1. Feature Collection
+The script freezes the pre-trained weights and runs a forward pass to collect "Meta-Features." This is a common pattern for adapting large models to specific biological property predictions (e.g., ΔΔG, functional scores).
+
+#### 2. Random Forest Regressor
+* **Optimization**: Uses `RandomizedSearchCV` with a Pearson correlation ($r$) scorer to find the best tree depth and splitting criteria.
+* **Stability**: Built as a 10-fold ensemble to reduce variance in predictions.
+
+#### 3. XGBoost Regressor (GPU Accelerated)
+* **Performance**: Utilizes `tree_method="hist"` and GPU acceleration for rapid training on large feature sets.
+* **Complexity**: Optimized for non-linear relationships using a `lossguide` growth policy and hyperparameter tuning for regularization ($L_1, L_2$).
+
+### 📊 Evaluation Metrics
+
+The final performance is evaluated using the **Pearson Correlation Coefficient ($r$)**. 
+The notebook concludes with a direct comparison between the **Random Forest** and **XGBoost** ensembles

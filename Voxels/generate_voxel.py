@@ -6,7 +6,7 @@ import pickle
 from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
 from functools import partial
-from voxel_utils_4 import compute_voxel_features_structural
+from Voxels.voxel_utils import compute_voxel_features_structural
 
 def voxelize_and_save(row, pdb_dir, output_dir):
     uid  = row["PDB"]
