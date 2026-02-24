@@ -1,6 +1,6 @@
 # EvoStructCLIP
 
-
+**PAPER LINK**
 
 EvoStructCLIP is a small-scale, multimodal mutation-centered embedding model designed to predict the functional consequences of missense variants. Rather than relying exclusively on global protein-wide representations, this model explicitly focuses on the coordinated local contexts of mutations.
 
@@ -64,10 +64,22 @@ python parse_msa.py \
 This step processes 3D protein structures to extract localized, multi-channel voxel representations centered around the mutated residue.
 
 ```bash
-# Generate Voxel features (.pkl) from PDB/AlphaFold files using multiprocessing
+# Generate Voxel features (.pkl) from PDB/AlphaFold files
 python generate_voxel.py \
   --tsv <path_to_input_tsv> \
   --pdb_dir <path_to_directory_containing_pdb_files> \
   --output_dir <path_to_save_voxel_pkl_files> \
   --workers <number_of_cpu_threads>
 ```
+
+---
+
+## Training
+
+
+---
+
+## Inference
+
+
+---
