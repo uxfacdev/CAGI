@@ -5,7 +5,7 @@ This repository contains the data preprocessing pipeline for **EvoStructCLIP**, 
 EvoStructCLIP requires three primary inputs to generate embeddings:
 1. **TSV file**: Contains variant information (e.g., UniProt ID, sequence, mutation details).
 2. **MSA `.pkl` file**: Contains evolutionary constraints derived from Multiple Sequence Alignments (MSA).
-3. **Voxel `.pkl` file**: Contains 3D structural features derived from AlphaFold/PDB.
+3. **Voxel `.pkl` file**: Contains 3D structural features derived from AlphaFold or experimental PDB structures.
 
 ## Dependencies
 
@@ -40,4 +40,16 @@ python parse_msa.py \
   --tsv <path_to_input_tsv> \
   --a3m <path_to_generated_a3m> \
   --output <path_to_output_pkl>
+```
+
+### Step 2: Voxel Pipeline
+This step processes 3D protein structures (AlphaFold predictions or PDB files) to extract localized, multi-channel voxel representations around the mutated residue.
+
+```bash
+# Generate Voxel features (.pkl) from PDB files using multiprocessing
+python generate_voxel.py \
+  --tsv <path_to_input_tsv> \
+  --pdb_dir <path_to_directory_containing_pdb_files> \
+  --output_dir <path_to_save_voxel_pkl_files> \
+  --workers <number_of_cpu_threads>
 ```
