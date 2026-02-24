@@ -1,25 +1,18 @@
-# EvoStructCLIP
+## Data Requirements
 
+The pipeline is divided into two stages: **Raw Data** for preprocessing and **Model Inputs** for training/inference.
 
+### 1. Raw Data (Required for Preprocessing)
+These files are necessary to run the MSA and Voxel pipelines:
+* **TSV file:** The master dataset containing variant-level metadata (e.g., UniProt ID, mutation position, target labels).
+* **FASTA files:** Raw sequence files used as queries to generate Multiple Sequence Alignments (MSA).
+* **PDB/AlphaFold files:** 3D structural files (.pdb) used to generate localized voxel representations.
 
-EvoStructCLIP is a small-scale, multimodal mutation-centered embedding model designed to predict the functional consequences of missense variants. Rather than relying exclusively on global protein-wide representations, this model explicitly focuses on the coordinated local contexts of mutations.
-
-The architecture integrates structural and evolutionary evidence through two complementary branches:
-* **Voxel Branch:** A 3D convolutional network (based on 3D MBConv and CoordAtt3D) that captures the local, three-dimensional structural environment surrounding a mutated residue.
-* **MSA Branch:** A cross-axial Mamba-based encoder that efficiently processes multiple sequence alignments (MSAs) to model deep evolutionary constraints and local consensus signals across homologous sequences.
-
-Embeddings from both modalities are aligned in a shared latent space using a symmetric CLIP-style contrastive loss. This alignment is jointly optimized with supervised variant pathogenicity classification and FuseMix latent-space regularization, providing a compact and transferable representation for diverse downstream variant effect prediction tasks (e.g., thermodynamic stability, transcript-level abundance, and receptor activation).
-
----
-
-## Required Inputs
-
-To run the data preprocessing pipeline and train/evaluate EvoStructCLIP, the following data formats are utilized:
-
-1. **TSV file:** The master dataset containing variant-level metadata (e.g., UniProt ID, sequence, mutation position, target labels).
-2. **FASTA files:** Raw sequence files used as queries to generate multiple sequence alignments.
-3. **MSA `.pkl` file:** The processed evolutionary constraints and sequence alignments generated from the FASTA files.
-4. **Voxel `.pkl` file:** The processed 46-channel 3D structural features derived from AlphaFold models or experimental PDB structures.
+### 2. Model Inputs (Generated Outputs)
+These are the final processed files directly ingested by the EvoStructCLIP encoders:
+* **Master TSV:** Refined variant list used to index and load the corresponding pickle files.
+* **MSA `.pkl` file:** Validated dictionary containing processed evolutionary constraints derived from the MSA pipeline.
+* **Voxel `.pkl` files:** Multi-channel 3D structural feature tensors (46-channel) generated from the Voxel pipeline.
 
 ---
 
@@ -40,10 +33,10 @@ conda install -c conda-forge -c bioconda mmseqs2
 
 ## Pipeline Usage
 
-The data preprocessing pipeline converts raw TSV, FASTA, and PDB files into the final `.pkl` formats directly ingested by the EvoStructCLIP encoders.
+The preprocessing pipeline converts Raw Data into Model Inputs.
 
 ### Step 1: MSA Pipeline (Evolutionary Features)
-This step searches for homologous sequences using MMseqs2 and parses the resulting A3M file into a validated pickle format based on the variants in your master TSV file.
+This step searches for homologous sequences using MMseqs2 and parses the resulting A3M file into a validated pickle format.
 
 ```bash
 # 1. Generate MSA (A3M format) from raw FASTA using MMseqs2
@@ -61,7 +54,7 @@ python parse_msa.py \
 ```
 
 ### Step 2: Voxel Pipeline (Structural Features)
-This step processes 3D protein structures to extract localized, multi-channel voxel representations centered around the mutated residue.
+This step processes 3D protein structures to extract localized voxel representations centered around the mutated residue.
 
 ```bash
 # Generate Voxel features (.pkl) from PDB/AlphaFold files using multiprocessing
