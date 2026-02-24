@@ -1,41 +1,47 @@
-## Data Requirements
+# EvoStructCLIP
 
-The pipeline is divided into two stages: **Raw Data** for preprocessing and **Model Inputs** for training/inference.
 
-### 1. Raw Data (Required for Preprocessing)
-These files are necessary to run the MSA and Voxel pipelines:
-* **TSV file:** The master dataset containing variant-level metadata (e.g., UniProt ID, mutation position, target labels).
-* **FASTA files:** Raw sequence files used as queries to generate Multiple Sequence Alignments (MSA).
-* **PDB/AlphaFold files:** 3D structural files (.pdb) used to generate localized voxel representations.
 
-### 2. Model Inputs (Generated Outputs)
-These are the final processed files directly ingested by the EvoStructCLIP encoders:
-* **Master TSV:** Refined variant list used to index and load the corresponding pickle files.
-* **MSA `.pkl` file:** Validated dictionary containing processed evolutionary constraints derived from the MSA pipeline.
-* **Voxel `.pkl` files:** Multi-channel 3D structural feature tensors (46-channel) generated from the Voxel pipeline.
+EvoStructCLIP is a small-scale, multimodal mutation-centered embedding model designed to predict the functional consequences of missense variants. Rather than relying exclusively on global protein-wide representations, this model explicitly focuses on the coordinated local contexts of mutations.
+
+The architecture integrates structural and evolutionary evidence through two complementary branches:
+* **Voxel Branch:** A 3D convolutional network (based on 3D MBConv and CoordAtt3D) that captures the local, three-dimensional structural environment surrounding a mutated residue.
+* **MSA Branch:** A cross-axial Mamba-based encoder that efficiently processes multiple sequence alignments (MSAs) to model deep evolutionary constraints and local consensus signals across homologous sequences.
+
+Embeddings from both modalities are aligned in a shared latent space using a symmetric CLIP-style contrastive loss. This alignment is jointly optimized with supervised variant pathogenicity classification and FuseMix latent-space regularization.
 
 ---
 
 ## Dependencies
 
-Ensure you have the core Python packages and MMseqs2 installed before running the pipelines:
+Install the core Python packages and MMseqs2 before running the pipelines:
 
 ```bash
 # 1. Install Python environment dependencies
 pip install -r requirements.txt
 
-# 2. Install MMseqs2 (via conda) for ultra-fast sequence searching
+# 2. Install MMseqs2 (via conda)
 conda install -c conda-forge -c bioconda mmseqs2
 ```
-*(Note: A formatted target database, such as UniRef90, is required for the MMseqs2 search.)*
 
 ---
 
-## Pipeline Usage
+## Preprocessing
 
-The preprocessing pipeline converts Raw Data into Model Inputs.
+EvoStructCLIP takes a **TSV file**, an **MSA `.pkl` file**, and **Voxel `.pkl` files** as direct model inputs. 이 파일들은 아래의 **Required Files**를 전처리(Preprocessing)하여 생성됩니다.
 
-### Step 1: MSA Pipeline (Evolutionary Features)
+### Required Files
+* **TSV file:** The master dataset containing variant-level metadata.
+* **FASTA files:** Raw sequence files used as queries for MSA generation.
+* **PDB/AlphaFold files:** 3D structural files (.pdb) for voxel representations.
+
+To ensure successful preprocessing, the unique identifiers (e.g., UniProt ID) must be consistent across all files. For example, if the ID in the TSV is `P01112`, the corresponding structural file must be named `p01112.pdb` and the FASTA entry must start with `>P01112`.
+
+---
+
+## Preprocessing Pipeline
+
+### Step 1: MSA Pipeline
 This step searches for homologous sequences using MMseqs2 and parses the resulting A3M file into a validated pickle format.
 
 ```bash
@@ -53,7 +59,7 @@ python parse_msa.py \
   --output <path_to_output_msa_pkl>
 ```
 
-### Step 2: Voxel Pipeline (Structural Features)
+### Step 2: Voxel Pipeline
 This step processes 3D protein structures to extract localized voxel representations centered around the mutated residue.
 
 ```bash
