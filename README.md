@@ -1,96 +1,43 @@
-# EvoStructCLIP: MSA Preprocessing Pipeline
+# EvoStructCLIP: Data Preprocessing Pipeline
 
 This repository contains the data preprocessing pipeline for **EvoStructCLIP**, a multimodal embedding model for variant effect prediction. 
 
 EvoStructCLIP requires three primary inputs to generate embeddings:
 1. **TSV file**: Contains variant information (e.g., UniProt ID, sequence, mutation details).
-2. **PDB `.pkl` file**: Contains 3D structural features derived from AlphaFold/PDB.
-3. **MSA `.pkl` file**: Contains evolutionary constraints derived from Multiple Sequence Alignments (MSA).
+2. **MSA `.pkl` file**: Contains evolutionary constraints derived from Multiple Sequence Alignments (MSA).
+3. **Voxel `.pkl` file**: Contains 3D structural features derived from AlphaFold/PDB.
 
-This documentation specifically covers the **MSA `.pkl` generation pipeline**, which consists of two main steps: running MMseqs2 to generate alignments (`make_msa.sh`) and parsing the results into a validated pickle format (`parse_msa.py`).
+## Dependencies
 
-## ⚙️ Dependencies
+Install the core Python packages and MMseqs2 before running the pipeline:
 
-Before running the pipeline, ensure you have the required dependencies installed.
-
-### 1. Python Environment
-Install the core Python packages listed in `requirements.txt`:
 ```bash
+# Python environment
 pip install -r requirements.txt
-```
 
-### 2. MMseqs2
-This pipeline relies on MMseqs2 for ultra-fast sequence searching and alignment. Please install it following the official [MMseqs2 GitHub page](https://github.com/soedinglab/MMseqs2) or via conda:
-```bash
+# MMseqs2 (via conda)
 conda install -c conda-forge -c bioconda mmseqs2
 ```
-*Note: You also need a formatted target database (e.g., UniRef90) to run the search.*
+*(Note: A formatted target database like UniRef90 is required for the MMseqs2 search.)*
 
 ---
 
-## 🚀 Pipeline Usage
+## Pipeline Usage
 
-### Step 1: Generate MSA using MMseqs2 (`make_msa.sh`)
-This bash script merges individual FASTA files, builds an MMseqs2 database, searches against a target database (e.g., UniRef90), and outputs an alignment file in A3M format.
+### Step 1: MSA Pipeline
+This step searches for homologous sequences using MMseqs2 and parses the resulting A3M file into a validated pickle format based on the variants in your TSV file.
 
-**Usage:**
 ```bash
+# 1. Generate MSA (A3M format) using MMseqs2
 bash make_msa.sh \
   --input_dir <path_to_fasta_directory> \
-  --target_db <path_to_uniref90_database> \
-  --output_prefix <experiment_name> \
+  --target_db <path_to_mmseqs_database> \
+  --output_prefix <output_prefix_name> \
   --threads <number_of_threads>
-```
 
-**Example:**
-```bash
-bash make_msa.sh \
-  --input_dir ./fasta_files_all_missense \
-  --target_db /db/uniref90_mmseqs \
-  --output_prefix merged_all \
-  --threads 36
-```
-
----
-
-### Step 2: Parse and Validate MSA (`parse_msa.py`)
-This Python script parses the generated A3M file, validates it against the unique keys (e.g., UniProt IDs) present in your master TSV file, and saves the parsed MSA data as a Python dictionary in a `.pkl` file. This `.pkl` file is the final input required by the EvoStructCLIP MSA branch.
-
-**Usage:**
-```bash
+# 2. Parse A3M and validate against TSV to create the final MSA .pkl
 python parse_msa.py \
   --tsv <path_to_input_tsv> \
-  --a3m <path_to_a3m_file_from_step1> \
-  --output <path_to_save_pickle>
+  --a3m <path_to_generated_a3m> \
+  --output <path_to_output_pkl>
 ```
-
-**Example:**
-```bash
-python parse_msa.py \
-  --tsv ./filtered_variants_cleaned_final.tsv \
-  --a3m ./merged_all_msa_a3m \
-  --output ./msa_dict_valid.pkl
-```
-
-**Validation Process:**
-The script will check if every `Key` (e.g., UniProt ID) present in the TSV file exists in the parsed A3M data. 
-- If validation passes, it saves the dictionary to the specified `.pkl` file.
-- If validation fails (e.g., missing IDs), it will display an error message with examples and **will not** save the pickle file, ensuring data integrity.
-
----
-
-## 📂 Output Data Structure
-
-The final output `msa_dict_valid.pkl` contains a Python `defaultdict(list)` structured as follows:
-
-```python
-{
-    "Query_ID_1": [
-        ("query", "MTEYKLVVVGAGGVGKSALTIQLI..."),
-        ("UniRef90_A0A024RBG1", "MTEYKLVVVGAGGVGKSALTIQLI..."),
-        # ... aligned homologous sequences
-    ],
-    "Query_ID_2": [ ... ]
-}
-```
-This structured format is directly fed into the Cross-axial Mamba block of EvoStructCLIP to extract evolutionary features.
